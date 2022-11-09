@@ -1,3 +1,18 @@
+// Import mongoose
+var mongoose = require('mongoose');
+
+// Instantiate MongoDB connection
+const uri = 'mongodb://127.0.0.1/game-shop';
+mongoose.Promise = global.Promise;
+
+var db = mongoose.connection;
+db.on('connecting', function () { console.log('Connecting to', uri); });
+db.on('connected', function () { console.log('Connected to', uri); });
+db.on('disconnecting', function () { console.log('Disconnecting from', uri); });
+db.on('disconnected', function () { console.log('Disconnected from', uri); });
+db.on('error', function (err) { console.error('Error:', err.message); });
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
 // Import express module
 var express = require('express');
 
@@ -31,38 +46,41 @@ app.get('/api/products', function (req, res, next) {
 });
 
 app.post('/api/users/signin', function (req, res, next) {
-    var user = model.signin(req.body.email, req.body.password);
-    if (user) {
-        res.cookie('uid', user._id);
-        return res.json({});
-    }
-    return res.status(401).json({ message: 'Invalid credentials' });
+    return model.signin(req.body.email, req.body.password).then(function (user) {
+        if (user) {
+            res.cookie('uid', user._id);
+            return res.json({});
+        }
+        return res.status(401).json({ message: 'Invalid credentials' });
+    });
 });
 
 app.get('/api/cart/qty', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
-        return res.status(401).send({ message: 'User has not signed in' });
+        return res.status(401).json({ message: 'User has not signed in' });
     }
-    var cartQty = model.getCartQty(uid);
-    if (cartQty !== null) {
-        return res.json(cartQty);
-    }
-    return res.status(500).send({ message: 'Cannot retrieve user cart quantity' });
+    return model.getCartQty(uid).then(function (aggregate) {
+        if (aggregate.length > 0) {
+            return res.json(aggregate[0].qty);
+        }
+        return res.status(500).json({ message: 'Cannot retrieve user cart quantity' });
+    });
 });
 
 app.post('/api/cart/items/product/:pid', function (req, res, next) {
     var pid = req.params.pid;
     var uid = req.cookies.uid;
     if (!uid) {
-        return res.status(401).send({ message: 'User has not signed in' });
+      return res.status(401).json({ message: 'User has not signed in' });
     }
-    var cart = Model.addItem(uid, pid);
-    if (cart) {
+    return Model.addItem(uid, pid).then(function (cart) {
+      if (cart) {
         return res.json(cart);
-    }
-    return res.status(500).send({ message: 'Cannot add item to cart' });
-});
+      }
+      return res.status(500).json({ message: 'Cannot add item to cart' });
+    });
+  });
 
 app.get('/api/cart', function (req, res, next) {
     var uid = req.cookies.uid;
@@ -103,14 +121,15 @@ app.delete('/api/cart/items/product/:id/all', function (req, res, next) {
 });
 
 app.post('/api/users/signup', function (req, res, next) {
-    var newUser = model.signup(req.body.name, req.body.surname, req.body.address, req.body.birth, req.body.email, req.body.password);
-    if (newUser){
-        return res.json(newUser);
-    }
-    return res.status(500).json({ message: 'That email is already registered!' });
+    return model.signup(req.body.name, req.body.surname, req.body.address, req.body.birth, req.body.email, req.body.password).then(function (user) {
+        if (user) {
+            return res.json(user._id);
+        }
+        return res.status(500).json({ message: 'Cannot create new user' });
+    });
 });
 
-app.get('/api/users/profile', function (req, res, next){
+app.get('/api/users/profile', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
@@ -137,7 +156,7 @@ app.post('/api/orders', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var order = Model.purchase(uid, req.body.card_number,req.body.card_owner, req.body.address);
+    var order = Model.purchase(uid, req.body.card_number, req.body.card_owner, req.body.address);
     if (order) {
         console.log(order);
         return res.json(order);
@@ -145,13 +164,13 @@ app.post('/api/orders', function (req, res, next) {
     return res.status(500).send({ message: 'Cannot order' });
 });
 
-app.get('/api/orders/id/:oid', function (req, res, next){
+app.get('/api/orders/id/:oid', function (req, res, next) {
     var oid = req.params.oid
     var uid = req.cookies.uid;
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var order = Model.getOrder(oid,uid);
+    var order = Model.getOrder(oid, uid);
     if (order) {
         return res.json(order);
     }

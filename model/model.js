@@ -1,3 +1,6 @@
+var mongoose = require('mongoose');
+var User = require('./user');
+
 Model = {}
 
 Model.products = [{
@@ -138,40 +141,30 @@ Model.users = [{
 }];
 
 Model.signin = function (email, password) {
-    Model.user = null;
-    for (var i = 0; i < Model.users.length; i++) {
-        if (Model.users[i].email == email && Model.users[i].password == password)
-            Model.user = Model.users[i];
-    }
-    return Model.user;
-}
+    return User.findOne({ email, password });
+  };
 
 Model.signout = function () {
     Model.user = null;
 }
 
 Model.signup = function (name, surname, address, birth, email, password) {
-    Model.user = null;
-    for (var i = 0; i < Model.users.length; i++) {
-        if (Model.users[i].email == email) {
-            return Model.user = null;
-        } else {
-            return Model.users.push({
-                '_id': Model._usersCount++,
-                'email': email,
-                'password': password,
-                'name': name,
-                'surname': surname,
-                'birthdate': new Date(birth),
-                'address': address,
-                'cartItems': [],
-                'orderItems': [],
-                'orders': [],
-            }
-            )
+    return User.findOne({ email }).then(function (user) {
+        if (!user) {
+            var user = new User({
+                email: email,
+                password: password,
+                name: name,
+                surname: surname,
+                birth: (new Date(birth)).getTime(),
+                address: address,
+                cartItems: []
+            });
+            return user.save();
         }
-    }
-}
+        return null;
+    });
+};
 
 Model.removeItem = function (uid, pid, all = false) {
     var user = Model.getUserById(uid);
@@ -215,12 +208,13 @@ Model.getUserById = function (userid) {
 };
 
 Model.getCartQty = function (uid) {
-    var user = Model.getUserById(uid);
-    if (user) {
-        return user.cartItems.length;
-    }
-    return null;
-};
+    // hacerlo bien para returnear el length y no la suma
+    return User.aggregate([
+      { $match: { "_id": mongoose.Types.ObjectId(uid) } },
+      { $lookup: { from: 'cartitems', localField: 'cartItems', foreignField: '_id', as: 'cartItems' } },
+      { $project: { qty: { $sum: "$cartItems.qty" } } }
+    ]);
+  };
 
 Model.getProductById = function (pid) {
     for (var i = 0; i < Model.products.length; i++) {
@@ -231,30 +225,31 @@ Model.getProductById = function (pid) {
     return null;
 };
 
-Model.addItem = function (uid, pid) {
-    var product = Model.getProductById(pid);
-    var user = Model.getUserById(uid);
-    if (user && product) {
+Model.addItem = function (uid, pid) { // all in promise is to wait for several promises
+    return Promise.all([User.findById(uid).populate('cartItems'), Product.findById(pid)]).then(function (results) {
+      var user = results[0];
+      var product = results[1];
+      if (user && product) {
         for (var i = 0; i < user.cartItems.length; i++) {
-            var cartItem = user.cartItems[i];
-            if (cartItem.product._id == pid) {
-                cartItem.qty++;
-                return user.cartItems;
-            }
+          var cartItem = user.cartItems[i];
+          if (cartItem.product == pid) {
+            cartItem.qty++;
+            return cartItem.save().then(function () {
+              return user.cartItems;
+            });
+          }
         }
-        var cartItem = {
-            _id: Model._cartItemsCount++,
-            product: product,
-            qty: 1
-        };
+        var cartItem = new CartItem({ qty: 1, product });
         user.cartItems.push(cartItem);
-        Model.cartItems.push(cartItem);
-        return user.cartItems;
-    }
-    return null;
-};
+        return Promise.all([cartItem.save(), user.save()]).then(function (result) {
+          return result[1].cartItems;
+        });
+      }
+      return null;
+    }).catch(function (err) { console.error(err); return null; });
+  };
 
-Model.purchase = function (uid,address,card_number, card_holder ) {
+Model.purchase = function (uid, address, card_number, card_holder) {
     var cartItemsTemp = [];
     var user = Model.getUserById(uid);
     var cart = Model.getCartByUserId(uid);
