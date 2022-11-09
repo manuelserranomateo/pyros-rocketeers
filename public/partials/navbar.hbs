@@ -1,0 +1,53 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark bg-gradient fixed-top">
+    <a class="navbar-brand" style="margin-left:20px" href="/" onclick="navigateTo(event, event.target.href)">
+        <img src="/images/logo_pyros.png" width="30" height="30" class="d-inline-block align-top" alt="">
+        Pyros Rocketeers
+    </a>
+    <button class="navbar-toggler" style="margin-right:20px" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
+        arialabel="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" style="margin-right:20px" id="navbarContent">
+        <ul class="navbar-nav mb-2 mb-md-0">
+            {{#if user}}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown" data-bs-toggle="dropdown"
+                    aria-expanded="false">Shopping Cart
+                    <span class="badge rounded-pill text-bg-light">{{cartQty}}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" arialabelledby="cartDropdown">
+                    <li><a class="dropdown-item" href="/cart" onclick="navigateTo(event, event.target.href)">Show
+                            Cart</a></li>
+                    <li><a class="dropdown-item" href="/purchase"
+                            onclick="navigateTo(event, event.target.href)">Purchase</a></li>
+                </ul>
+            </li>
+            {{/if}}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown"
+                    aria-expanded="false">User Management</a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" arialabelledby="userDropdown">
+                    {{#unless user}}<li><a class="dropdown-item" href="/signin"
+                            onclick="navigateTo(event, event.target.href)">Sign in</a></li>
+                    <li><a class="dropdown-item" href="/signup" onclick="navigateTo(event, event.target.href)">Sign
+                            up</a></li>{{/unless}}
+                    {{#if user}}<li><a class="dropdown-item" href="/profile"
+                            onclick="navigateTo(event, event.target.href)">Profile</a></li>{{/if}}
+                    {{#if user}}
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="/"
+                            onclick="signout_clicked(event), navigateTo(event, event.target.href)">Sign out</a></li>
+                    {{/if}}
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
+<script>
+    function signout_clicked(event) {
+        Model.signout();
+    }
+</script>

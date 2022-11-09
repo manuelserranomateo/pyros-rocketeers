@@ -1,0 +1,48 @@
+{{> navbar}}
+{{> header}}
+{{> messages}}
+<main>
+    <div class="container">
+        {{#if userInfo}}
+        <div>
+            <h1>Profile</h1>
+            <p><strong>Name:</strong> {{userInfo.name}}</p>
+            <p><strong>Surname:</strong> {{userInfo.surname}}</p>
+            <p><strong>Birth:</strong> {{formatDate userInfo.birthdate}}</p>
+            <p><strong>Address:</strong> {{userInfo.address}}</p>
+            <p><strong>Email:</strong> {{userInfo.email}}</p>
+        </div>
+        <div>
+            {{#if userInfo.orders}}
+            <h1>Order list</h1>
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Number</th>
+                        <th scope="col">Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each userInfo.orders}}
+                    <tr>
+                        <td>{{formatDate this.date}}</td>
+                        <td>{{this.number}}</td>
+                        <td>₹ {{total this.orderItems}}</td>
+                        <td><a class="btn btn-primary"
+                                onclick="navigateTo(event, '/order/id/{{this.number}}')">Details</a></td>
+                    </tr>
+                    {{/each}}
+
+
+                </tbody>
+            </table>
+            {{else}}
+            <h3>No orders yet</h3>{{/if}}
+        </div>
+        {{else}}
+        <h3>No profile details to show</h3>{{/if}}
+    </div>
+</main>
+{{> footer}}

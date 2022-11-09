@@ -1,0 +1,56 @@
+{{> navbar}}
+{{> header}}
+{{> messages}}
+<main>
+    <div class="container text-center" style="max-width: 500px">
+        <h1 class="p-3 ">Sign in</h1>
+        <form id="signin-form" class="row gy-3 needs-validation" novalidate>
+            <div class="form-group">
+                <input type="email" id="email" class="form-control" placeholder=" Email address" required=""
+                    autofocus="">
+                <div class="invalid-feedback">The email field cannot be empty</div>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" class="form-control" placeholder="Password" required=""
+                    autofocus="">
+                <div class="invalid-feedback">The password field cannot be empty</div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-primary" href="/index" onclick="signin_clicked(event)" role="button">Sign in</a>
+            </div>
+        </form>
+    </div>
+</main>
+{{> footer}}
+<script>
+    function signin_clicked(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#signin-form').submit();
+    }
+    $(function () {
+        $('#signin-form').on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.checkValidity()) {
+                $(this).addClass('was-validated');
+                return false;
+            }
+            Model.signin($('#email').val(), $('#password').val()).done(function (user) {
+                Messages.success.push('Welcome back!');
+                navigateTo(e, '/');
+            }).fail(function (error) {
+                Messages.danger.push(`${error.statusText} (${error.status}): ${error.responseJSON.message}`);
+                navigateTo(e, '/signin');
+            });
+        });
+        $('#signin-form input').on('blur', function (e) {
+            if (!this.checkValidity()) {
+                $(this).removeClass('is-valid').addClass('is-invalid');
+            }
+            else {
+                $(this).removeClass('is-invalid').addClass('is-valid');
+            }
+        });
+    });
+</script>
