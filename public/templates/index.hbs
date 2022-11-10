@@ -18,7 +18,7 @@
                                 <b>{{formatPrice this.price}}</b>
                             </p>
                             <a style="height: 50px; font-size: 20px;"
-                                onclick="addItem(event, {{_id}}) ,navigateTo(event, event.target.href)"
+                                onclick="addItem(event, '{{_id}}') ,navigateTo(event, event.target.href)"
                                 class="col-4 btn btn-success bi bi-cart4 {{#unless ../user}}disabled{{/unless}}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                                     class="bi bi-cart4" viewBox="0 0 16 16">

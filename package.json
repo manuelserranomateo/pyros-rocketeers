@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "db": "node ./model/seeder.js",
     "start": "node ./app.js"
   },
   "author": "",

@@ -2,7 +2,7 @@
 var mongoose = require('mongoose');
 
 // Instantiate MongoDB connection
-const uri = 'mongodb://127.0.0.1/game-shop';
+const uri = 'mongodb://127.0.0.1/pyros-rocketeers';
 mongoose.Promise = global.Promise;
 
 var db = mongoose.connection;
@@ -42,7 +42,13 @@ app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/products', function (req, res, next) {
-    return res.json(model.products);
+    return model.getProducts().then(function (products) {
+        if (products) {
+            return res.json(products);
+        }
+        return res.status(500).json({ message: 'No products' });
+
+    })
 });
 
 app.post('/api/users/signin', function (req, res, next) {
@@ -60,9 +66,9 @@ app.get('/api/cart/qty', function (req, res, next) {
     if (!uid) {
         return res.status(401).json({ message: 'User has not signed in' });
     }
-    return model.getCartQty(uid).then(function (aggregate) {
-        if (aggregate.length > 0) {
-            return res.json(aggregate[0].qty);
+    return model.getCartQty(uid).then(function (qty) {
+        if (qty > 0) {
+            return res.json(qty);
         }
         return res.status(500).json({ message: 'Cannot retrieve user cart quantity' });
     });
@@ -72,15 +78,15 @@ app.post('/api/cart/items/product/:pid', function (req, res, next) {
     var pid = req.params.pid;
     var uid = req.cookies.uid;
     if (!uid) {
-      return res.status(401).json({ message: 'User has not signed in' });
+        return res.status(401).json({ message: 'User has not signed in' });
     }
     return Model.addItem(uid, pid).then(function (cart) {
-      if (cart) {
-        return res.json(cart);
-      }
-      return res.status(500).json({ message: 'Cannot add item to cart' });
+        if (cart) {
+            return res.json(cart);
+        }
+        return res.status(500).json({ message: 'Cannot add item to cart' });
     });
-  });
+});
 
 app.get('/api/cart', function (req, res, next) {
     var uid = req.cookies.uid;
