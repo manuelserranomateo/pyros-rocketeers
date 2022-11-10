@@ -93,11 +93,12 @@ app.get('/api/cart', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var cart = Model.getCartByUserId(uid);
-    if (cart) {
-        return res.json(cart);
-    }
-    return res.status(500).send({ message: 'Cannot retrieve cart' });
+    return Model.getCartByUserId(uid).then(function (cart){
+        if (cart){
+            return res.json(cart);
+        }
+        return res.status(500).send({ message: 'Cannot retrieve cart' });
+    })
 });
 
 app.delete('/api/cart/items/product/:id', function (req, res, next) {

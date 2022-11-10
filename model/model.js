@@ -7,7 +7,7 @@ Model = {}
 
 Model.signin = function (email, password) {
     return User.findOne({ email, password });
-  };
+};
 
 Model.signout = function () {
     Model.user = null;
@@ -64,19 +64,16 @@ Model.getOrder = function (number, uid) {
 }
 
 Model.getUserById = function (userid) {
-    for (var i = 0; i < Model.users.length; i++) {
-        if (Model.users[i]._id == userid) {
-            return Model.users[i];
-        }
-    }
-    return null;
+    return User.findById(userid);
 };
 
 Model.getCartQty = function (uid) {
-    return User.findById(uid).then(function (user){
-        return user.cartItems.length;
+    return User.findById(uid).then(function (user) {
+        if (user) {
+            return user.cartItems.length;
+        }
     })
-  };
+};
 
 Model.getProductById = function (pid) {
     return Product.findById(pid).then(function (product) {
@@ -88,26 +85,28 @@ Model.getProductById = function (pid) {
 
 Model.addItem = function (uid, pid) { // all in promise is to wait for several promises
     return Promise.all([User.findById(uid), Product.findById(pid)]).then(function (results) {
-      var user = results[0];
-      var product = results[1];
-      if (user && product) {
-        for (var i = 0; i < user.cartItems.length; i++) {
-          var cartItem = user.cartItems[i];
-          if (cartItem.product == pid) {
-            cartItem.qty++;
-            return user.save().then(function () {
-              return user.cartItems;
+        var user = results[0];
+        var product = results[1];
+        if (user && product) {
+            for (var i = 0; i < user.cartItems.length; i++) {
+                var cartItem = user.cartItems[i];
+                if (cartItem.product == pid) {
+                    cartItem.qty++;
+                    return user.save().then(function () {
+                        return user.cartItems;
+                    });
+                }
+            }
+            user.cartItems.push({ qty: 1, product });
+            // esto da un 500 cuando se añade un product nuevo, con el all y el array con un elemento se soluciona
+            return Promise.all([user.save()]).then(function (result) {
+                console.log(result);
+                return result[0].cartItems;
             });
-          }
         }
-        user.cartItems.push({ qty: 1, product });
-        return Promise(user.save()).then(function (result) {
-          return result[0].cartItems;
-        });
-      }
-      return null;
+        return null;
     }).catch(function (err) { console.error(err); return null; });
-  };
+};
 
 Model.purchase = function (uid, address, card_number, card_holder) {
     var cartItemsTemp = [];
@@ -140,13 +139,15 @@ Model.purchase = function (uid, address, card_number, card_holder) {
     return order
 }
 
-
 Model.getCartByUserId = function (uid) {
-    var user = Model.getUserById(uid);
-    if (user) {
-        return user.cartItems;
-    }
-    return null;
+    return User.findById(uid).then(function (user) {
+        if (user) {
+            return user.populate({
+                path: 'cartItems',
+                populate: { path: 'product'}
+            });
+        }
+    })
 }
 
 Model.getOrdersByUserId = function (uid) {
@@ -157,7 +158,7 @@ Model.getOrdersByUserId = function (uid) {
     return null;
 }
 
-Model.getProducts = function(){
+Model.getProducts = function () {
     return Product.find();
 }
 
