@@ -107,11 +107,13 @@ app.delete('/api/cart/items/product/:id', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var cart = Model.removeItem(uid, pid, false);
-    if (cart) {
-        return res.json(cart);
-    }
-    return res.status(500).send({ message: 'Cannot remove item from cart' });
+    return Model.removeItem(uid, pid, false).then(function(cart){
+        if (cart){
+            return res.json(cart);
+        }
+        return res.status(500).send({ message: 'Cannot remove item from cart' });
+    })
+
 });
 
 app.delete('/api/cart/items/product/:id/all', function (req, res, next) {
@@ -120,11 +122,12 @@ app.delete('/api/cart/items/product/:id/all', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var cart = Model.removeItem(uid, pid, true);
-    if (cart) {
-        return res.json(cart);
-    }
-    return res.status(500).send({ message: 'Cannot remove item from cart' });
+    return Model.removeItem(uid, pid, true).then(function(cart){
+        if (cart){
+            return res.json(cart);
+        }
+        return res.status(500).send({ message: 'Cannot remove item from cart' });
+    })
 });
 
 app.post('/api/users/signup', function (req, res, next) {

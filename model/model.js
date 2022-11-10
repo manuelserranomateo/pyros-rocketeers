@@ -142,10 +142,7 @@ Model.purchase = function (uid, address, card_number, card_holder) {
 Model.getCartByUserId = function (uid) {
     return User.findById(uid).then(function (user) {
         if (user) {
-            return user.populate({
-                path: 'cartItems',
-                populate: { path: 'product'}
-            });
+            return user.cartItems;
         }
     })
 }
