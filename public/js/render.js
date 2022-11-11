@@ -50,7 +50,6 @@ function route() {
         });
     } else if (matches = path.match(/^\/cart\/?$/)) {
         var cartP = Model.getCart().done(function (cart) {
-            console.log(cart);
             context.cartItems = cart;
         }).fail(function () {
             console.error('Cannot retrieve cart');

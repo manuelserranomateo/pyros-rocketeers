@@ -31,24 +31,51 @@ Model.signup = function (name, surname, address, birth, email, password) {
     });
 };
 
-// to do
-Model.removeItem = function (uid, pid, all = false) {
-    var user = Model.getUserById(uid);
-    if (user) {
-        for (var i = 0; i < user.cartItems.length; i++) {
-            var item = user.cartItems[i];
-            if (item.product._id == pid) {
-                if (!all && (item.qty > 1)) {
-                    item.qty--;
-                } else {
-                    user.cartItems.splice(i, 1);
-                    Model.cartItems.splice(Model.cartItems.indexOf(item), 1);
+Model.addItem = function (uid, pid) {
+    return Promise.all([User.findById(uid), Product.findById(pid)]).then(function (results) {
+        var user = results[0];
+        var product = results[1];
+        if (user && product) {
+            for (var i = 0; i < user.cartItems.length; i++) {
+                var cartItem = user.cartItems[i];
+                if (cartItem.product == pid) {
+                    cartItem.qty++;
+                    return user.save().then(function () {
+                        return user.cartItems;
+                    });
                 }
-                return user.cartItems;
+            }
+            user.cartItems.push({ qty: 1, product });
+            return Promise.all([user.save()]).then(function (result) {
+                console.log(result);
+                return result[0].cartItems;
+            });
+        }
+        return null;
+    }).catch(function (err) { console.error(err); return null; });
+};
+
+Model.removeItem = function (uid, pid, all = false) {
+    return Promise.all([User.findById(uid), Product.findById(pid)]).then(function (results) {
+        var user = results[0];
+        var product = results[1];
+        if (user && product) {
+            for (var i = 0; i < user.cartItems.length; i++) {
+                var cartItem = user.cartItems[i];
+                if (cartItem.product == pid) {
+                    if (!all && cartItem.qty > 1){
+                        cartItem.qty--;
+                    } else {
+                        user.cartItems.splice(i, 1);
+                    }
+                    return user.save().then(function () {
+                        return user.cartItems;
+                    });
+                }
             }
         }
-    }
-    return null;
+        return null;
+    }).catch(function (err) { console.error(err); return null; });
 };
 
 // to do
@@ -83,30 +110,6 @@ Model.getProductById = function (pid) {
             return null;
         }
     });
-};
-
-Model.addItem = function (uid, pid) {
-    return Promise.all([User.findById(uid), Product.findById(pid)]).then(function (results) {
-        var user = results[0];
-        var product = results[1];
-        if (user && product) {
-            for (var i = 0; i < user.cartItems.length; i++) {
-                var cartItem = user.cartItems[i];
-                if (cartItem.product == pid) {
-                    cartItem.qty++;
-                    return user.save().then(function () {
-                        return user.cartItems;
-                    });
-                }
-            }
-            user.cartItems.push({ qty: 1, product });
-            return Promise.all([user.save()]).then(function (result) {
-                console.log(result);
-                return result[0].cartItems;
-            });
-        }
-        return null;
-    }).catch(function (err) { console.error(err); return null; });
 };
 
 // to do
