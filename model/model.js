@@ -31,6 +31,7 @@ Model.signup = function (name, surname, address, birth, email, password) {
     });
 };
 
+// to do
 Model.removeItem = function (uid, pid, all = false) {
     var user = Model.getUserById(uid);
     if (user) {
@@ -50,6 +51,7 @@ Model.removeItem = function (uid, pid, all = false) {
     return null;
 };
 
+// to do
 Model.getOrder = function (number, uid) {
     var user = this.getUserById(uid)
     if (user) {
@@ -83,7 +85,7 @@ Model.getProductById = function (pid) {
     });
 };
 
-Model.addItem = function (uid, pid) { // all in promise is to wait for several promises
+Model.addItem = function (uid, pid) {
     return Promise.all([User.findById(uid), Product.findById(pid)]).then(function (results) {
         var user = results[0];
         var product = results[1];
@@ -98,7 +100,6 @@ Model.addItem = function (uid, pid) { // all in promise is to wait for several p
                 }
             }
             user.cartItems.push({ qty: 1, product });
-            // esto da un 500 cuando se añade un product nuevo, con el all y el array con un elemento se soluciona
             return Promise.all([user.save()]).then(function (result) {
                 console.log(result);
                 return result[0].cartItems;
@@ -108,6 +109,7 @@ Model.addItem = function (uid, pid) { // all in promise is to wait for several p
     }).catch(function (err) { console.error(err); return null; });
 };
 
+// to do
 Model.purchase = function (uid, address, card_number, card_holder) {
     var cartItemsTemp = [];
     var user = Model.getUserById(uid);
@@ -140,13 +142,17 @@ Model.purchase = function (uid, address, card_number, card_holder) {
 }
 
 Model.getCartByUserId = function (uid) {
-    return User.findById(uid).then(function (user) {
+    return User.findById(uid).populate({
+        path: 'cartItems',
+        populate: 'product'
+    }).then(function (user) {
         if (user) {
             return user.cartItems;
         }
     })
 }
 
+// to do
 Model.getOrdersByUserId = function (uid) {
     var user = Model.getUserById(uid);
     if (user) {
