@@ -3,6 +3,8 @@ var mongoose = require('mongoose');
 var User = require('./user');
 var Product = require('./product');
 var Order = require('./order');
+var OrderItem = require('./orderItem');
+
 
 Model = {}
 
@@ -48,7 +50,6 @@ Model.addItem = function (uid, pid) {
             }
             user.cartItems.push({ qty: 1, product });
             return Promise.all([user.save()]).then(function (result) {
-                console.log(result);
                 return result[0].cartItems;
             });
         }
@@ -64,7 +65,7 @@ Model.removeItem = function (uid, pid, all = false) {
             for (var i = 0; i < user.cartItems.length; i++) {
                 var cartItem = user.cartItems[i];
                 if (cartItem.product == pid) {
-                    if (!all && cartItem.qty > 1){
+                    if (!all && cartItem.qty > 1) {
                         cartItem.qty--;
                     } else {
                         user.cartItems.splice(i, 1);
@@ -119,15 +120,6 @@ Model.purchase = function (uid, address, card_number, card_holder) {
     // var user = Model.getUserById(uid);
     // var cart = Model.getCartByUserId(uid);
 
-    // for (i = 0; i < cart.length; i++) {
-    //     cartItemsTemp.push({
-    //         'qty': cart[i].qty,
-    //         'price': cart[i].product.price,
-    //         'tax': cart[i].product.tax,
-    //         'product': cart[i].product
-    //     });
-    // }
-
     // order = {
     //     'number': Date.now(),
     //     'date': new Date(),
@@ -144,33 +136,32 @@ Model.purchase = function (uid, address, card_number, card_holder) {
     // }
     // return order
 
-    return Promise.all([User.findById(uid)]).then(function (results) {
+
+
+    
+    return Promise.all([User.findById(uid).populate({
+        path: 'cartItems',
+        populate: 'product'
+    })]).then(function (results) {
         var user = results[0];
-        if (user && user.cartItems) {
-            for (var i = 0; i < user.cartItems.length; i++){
-                var cartItem = user.cartItems[i];
-                var order = new Order({
-                    'number': Date.now(),
-                    'date': new Date(),
-                    'address': address,
-                    'cardHolder': card_holder,
-                    'cardNumber': card_number,
-                    'orderItems': [{
-                        'qty': cartItem.qty,
-                        'price': cartItem.product.price,
-                        'tax': cartItem.product.tax,
-                        'product': cartItem.product
-                }]
-                })
-            }
-            
-            
-            return order.save().then(function () {
-                return user.orders;
-            });
+        // console.log(user)
+        var orderItem = new OrderItem()
+        for(var i=0; i < user.cartItems;i++){
+            var aux = user.cartItems[i];
+            console.log("AUX")
+            console.log(aux)
+            // orderItem.push({
+            //     qty: aux.qty,
+            //     price: aux.product.price,
+            //     tax: aux.product.tax,
+            //     product: aux.product
+            // })
         }
-        return null;
-    }).catch(function (err) { console.error(err); return null; });
+        // return orderItem.save().then(function () {
+        //     return orderItem;
+        // });
+        
+    })
 }
 
 Model.getCartByUserId = function (uid) {
