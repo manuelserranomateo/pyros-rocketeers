@@ -137,30 +137,23 @@ Model.purchase = function (uid, address, card_number, card_holder) {
     // return order
 
 
-
-    
     return Promise.all([User.findById(uid).populate({
         path: 'cartItems',
         populate: 'product'
     })]).then(function (results) {
         var user = results[0];
-        // console.log(user)
-        var orderItem = new OrderItem()
-        for(var i=0; i < user.cartItems;i++){
-            var aux = user.cartItems[i];
-            console.log("AUX")
-            console.log(aux)
-            // orderItem.push({
-            //     qty: aux.qty,
-            //     price: aux.product.price,
-            //     tax: aux.product.tax,
-            //     product: aux.product
-            // })
+        var orderItems = new OrderItem();
+        for (var i = 0; i < user.cartItems.length; i++) {
+            let aux = user.cartItems[i];
+            var orderItem = new OrderItem({
+                'qty': aux.qty,
+                'price': aux.product.price,
+                'tax': aux.product.tax,
+                'product': aux.product
+            })
+            orderItems.push(orderItem);
         }
-        // return orderItem.save().then(function () {
-        //     return orderItem;
-        // });
-        
+        return orderItems.save();
     })
 }
 
