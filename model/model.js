@@ -144,13 +144,21 @@ Model.purchase = function (uid, address, card_number, card_holder) {
         var user = results[0];
         for (var i = 0; i < user.cartItems.length; i++) {
             let aux = user.cartItems[i];
-            OrderItem.insertMany({
+            OrderItem.create({
                 'qty': aux.qty,
                 'price': aux.product.price,
                 'tax': aux.product.tax,
                 'product': aux.product
             })
         }
+        Order.create({
+            'number': Date.now(),
+            'date': new Date(),
+            'address': address,
+            'card_number': card_number,
+            'card_holder': card_holder
+            // 'orderItems': OrderItem
+        })
     })
 }
 
