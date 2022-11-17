@@ -13,7 +13,8 @@ var schema = mongoose.Schema({
       product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }
     }]
   },
-  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order'}]    
+  orderItems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'OrderItem'}],   
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order'}]   
 });
 
 module.exports = mongoose.model('User', schema);

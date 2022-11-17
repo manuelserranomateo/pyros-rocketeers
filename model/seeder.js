@@ -6,6 +6,7 @@ mongoose.Promise = global.Promise;
 var User = require('./user');
 var Product = require('./product');
 var Order = require('./order');
+var OrderItem = require('./orderItem')
 
 
 var uri = 'mongodb://127.0.0.1/pyros-rocketeers'; //hasta game-shop es el server, lo de despues es el nombre de la bbdd
@@ -42,6 +43,8 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(
     return User.deleteMany()
         .then(function () { return user.save(); })
         .then(function () { return Product.deleteMany(); })
+        .then(function () { return Order.deleteMany(); })
+        .then(function () { return OrderItem.deleteMany(); })  
         .then(function () {
             return Product.insertMany([
                 {
