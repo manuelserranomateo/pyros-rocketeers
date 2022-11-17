@@ -93,8 +93,8 @@ app.get('/api/cart', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    return Model.getCartByUserId(uid).then(function (cart){
-        if (cart){
+    return Model.getCartByUserId(uid).then(function (cart) {
+        if (cart) {
             return res.json(cart);
         }
         return res.status(500).send({ message: 'Cannot retrieve cart' });
@@ -107,8 +107,8 @@ app.delete('/api/cart/items/product/:id', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    return Model.removeItem(uid, pid, false).then(function(cart){
-        if (cart){
+    return Model.removeItem(uid, pid, false).then(function (cart) {
+        if (cart) {
             return res.json(cart);
         }
         return res.status(500).send({ message: 'Cannot remove item from cart' });
@@ -122,8 +122,8 @@ app.delete('/api/cart/items/product/:id/all', function (req, res, next) {
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    return Model.removeItem(uid, pid, true).then(function(cart){
-        if (cart){
+    return Model.removeItem(uid, pid, true).then(function (cart) {
+        if (cart) {
             return res.json(cart);
         }
         return res.status(500).send({ message: 'Cannot remove item from cart' });
@@ -139,55 +139,58 @@ app.post('/api/users/signup', function (req, res, next) {
     });
 });
 
-// to do
 app.get('/api/users/profile', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    profile = Model.getUserById(uid);
+    return Model.getUserById(uid).then(function (profile){
+        return res.json(profile);s
+    });
 
-    return res.json(profile);
 });
 
-// to do
+
 app.get('/api/orders', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var order = Model.getOrdersByUserId(uid);
-    if (order) {
-        return res.json(order);
-    }
-    return res.status(500).send({ message: 'Cannot retrieve orders' });
+    return Model.getOrdersByUserId(uid).then(function (order) {
+        if (order) {
+            return res.json(order);
+        }
+        return res.status(500).send({ message: 'Cannot retrieve orders' });
+    });
+
 });
 
-// to do
 app.post('/api/orders', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var order = Model.purchase(uid, req.body.card_number, req.body.card_owner, req.body.address);
-    if (order) {
-        return res.json(order);
-    }
-    return res.status(500).send({ message: 'Cannot order' });
+    return Model.purchase(uid, req.body.card_number, req.body.card_owner, req.body.address).then(function (order) {
+        if (order) {
+            return res.json(order);
+        }
+        return res.status(500).send({ message: 'Cannot order' });
+    })
 });
 
-// to do
 app.get('/api/orders/id/:oid', function (req, res, next) {
     var oid = req.params.oid
     var uid = req.cookies.uid;
     if (!uid) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
-    var order = Model.getOrder(oid, uid);
-    if (order) {
-        return res.json(order);
-    }
-    return res.status(500).send({ message: 'Cannot retrieve orders' });
+    return Model.getOrder(oid, uid).then(function (order) {
+        if (order) {
+            return res.json(order);
+        }
+        return res.status(500).send({ message: 'Cannot retrieve orders' });
+
+    });
 
 })
 

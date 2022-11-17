@@ -4,7 +4,6 @@ var User = require('./user');
 var Product = require('./product');
 var Order = require('./order');
 var OrderItem = require('./orderItem');
-const { insertMany } = require('./user');
 
 
 Model = {}
@@ -83,16 +82,20 @@ Model.removeItem = function (uid, pid, all = false) {
 
 // to do
 Model.getOrder = function (number, uid) {
-    var user = this.getUserById(uid)
-    if (user) {
-        for (i = 0; i < user.orders.length; i++) {
-            if (user.orders[i].number == number) {
-                return user.orders[i];
+    return User.findById(uid).then(function (user){
+        if(user){
+            return Order.find({number}).then(function (orders){
+                if ((orders.length > 0) && user.orders.includes(orders[0]._id)){
+                    return orders[0].populate({
+                        path: 'orderItems',
+                        populate: {path : 'product'}
+                    });
+                }
+                return null;
+                });
             }
-        }
-    } else {
-        return null;
-    }
+            return null
+    });
 }
 
 Model.getUserById = function (userid) {
@@ -115,48 +118,43 @@ Model.getProductById = function (pid) {
     });
 };
 
-// to do
 Model.purchase = function (uid, address, card_number, card_holder) {
-    // var cartItemsTemp = [];
-    // var user = Model.getUserById(uid);
-    // var cart = Model.getCartByUserId(uid);
-
-    // order = {
-    //     'number': Date.now(),
-    //     'date': new Date(),
-    //     'address': address,
-    //     'card_number': card_number,
-    //     'card_holder': card_holder,
-    //     'orderItems': cartItemsTemp,
-    // }
-    // user.orders.push(order);
-
-    // len = cart.length;
-    // for (i = 0; i < len; i++) {
-    //     cart.pop();
-    // }
-    // return order
     return Promise.all([User.findById(uid).populate({
         path: 'cartItems',
         populate: 'product'
     })]).then(function (results) {
         var user = results[0];
+        var orderItems = [];
         for (var i = 0; i < user.cartItems.length; i++) {
             let aux = user.cartItems[i];
-            OrderItem.create({
+            var orderItem = new OrderItem({
                 'qty': aux.qty,
                 'price': aux.product.price,
                 'tax': aux.product.tax,
                 'product': aux.product
-            })
+            });
+            orderItems.push(orderItem);
         }
-        Order.create({
+        var order = new Order({
             'number': Date.now(),
             'date': new Date(),
             'address': address,
             'card_number': card_number,
-            'card_holder': card_holder
-            //'orderItems': 
+            'card_holder': card_holder,
+            'orderItems': orderItems
+        })
+        user.orders.push(order);
+
+        len = user.cartItems.length;
+        for (i = 0; i < len; i++) {
+            user.cartItems.pop();
+        }
+        return Promise.all([OrderItem.insertMany(orderItems)]).then(function () {
+            return order.save().then(function () {
+                return user.save().then(function (){
+                    return order;
+                })
+            })
         })
     })
 }
@@ -172,13 +170,16 @@ Model.getCartByUserId = function (uid) {
     })
 }
 
-// to do
+
 Model.getOrdersByUserId = function (uid) {
-    var user = Model.getUserById(uid);
-    if (user) {
-        return user.orders;
-    }
-    return null;
+    return User.findById(uid).populate({
+        path: 'orders',
+        populate: {path : 'orderItems', populate : 'product'}
+    }).then(function (user) {
+        if (user) {
+            return user.orders;
+        }
+    })
 }
 
 Model.getProducts = function () {
