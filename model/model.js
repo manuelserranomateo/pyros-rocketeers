@@ -4,6 +4,7 @@ var User = require('./user');
 var Product = require('./product');
 var Order = require('./order');
 var OrderItem = require('./orderItem');
+const { insertMany } = require('./user');
 
 
 Model = {}
@@ -135,8 +136,6 @@ Model.purchase = function (uid, address, card_number, card_holder) {
     //     cart.pop();
     // }
     // return order
-
-
     return Promise.all([User.findById(uid).populate({
         path: 'cartItems',
         populate: 'product'
@@ -157,7 +156,7 @@ Model.purchase = function (uid, address, card_number, card_holder) {
             'address': address,
             'card_number': card_number,
             'card_holder': card_holder
-            // 'orderItems': OrderItem
+            //'orderItems': 
         })
     })
 }
