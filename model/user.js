@@ -13,7 +13,6 @@ var schema = mongoose.Schema({
       product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }
     }]
   },
-  orderItems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'OrderItem'}],   
   orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order'}]   
 });
 

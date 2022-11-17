@@ -139,6 +139,7 @@ app.post('/api/users/signup', function (req, res, next) {
     });
 });
 
+// to do
 app.get('/api/users/profile', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
@@ -149,6 +150,7 @@ app.get('/api/users/profile', function (req, res, next) {
     return res.json(profile);
 });
 
+// to do
 app.get('/api/orders', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
@@ -161,6 +163,7 @@ app.get('/api/orders', function (req, res, next) {
     return res.status(500).send({ message: 'Cannot retrieve orders' });
 });
 
+// to do
 app.post('/api/orders', function (req, res, next) {
     var uid = req.cookies.uid;
     if (!uid) {
@@ -168,12 +171,12 @@ app.post('/api/orders', function (req, res, next) {
     }
     var order = Model.purchase(uid, req.body.card_number, req.body.card_owner, req.body.address);
     if (order) {
-        console.log(order);
         return res.json(order);
     }
     return res.status(500).send({ message: 'Cannot order' });
 });
 
+// to do
 app.get('/api/orders/id/:oid', function (req, res, next) {
     var oid = req.params.oid
     var uid = req.cookies.uid;
