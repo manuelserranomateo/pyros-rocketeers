@@ -71,6 +71,7 @@ function route() {
     }
     else if (matches = path.match(/^\/profile\/?$/)) {
         var userP = Model.getProfile().done(function (profile) {
+            console.log(profile)
             context.userInfo = profile;
         }).fail(function () {
             console.error('Cannot retrieve profile');

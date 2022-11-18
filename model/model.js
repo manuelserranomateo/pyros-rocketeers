@@ -82,24 +82,27 @@ Model.removeItem = function (uid, pid, all = false) {
 
 // to do
 Model.getOrder = function (number, uid) {
-    return User.findById(uid).then(function (user){
-        if(user){
-            return Order.find({number}).then(function (orders){
-                if ((orders.length > 0) && user.orders.includes(orders[0]._id)){
+    return User.findById(uid).then(function (user) {
+        if (user) {
+            return Order.find({ number }).then(function (orders) {
+                if ((orders.length > 0) && user.orders.includes(orders[0]._id)) {
                     return orders[0].populate({
                         path: 'orderItems',
-                        populate: {path : 'product'}
+                        populate: { path: 'product' }
                     });
                 }
                 return null;
-                });
-            }
-            return null
+            });
+        }
+        return null
     });
 }
 
 Model.getUserById = function (userid) {
-    return User.findById(userid);
+    return User.findById(userid).populate({
+        path: 'orders',
+        populate: { path: 'orderItems', populate: 'product' }
+    });
 };
 
 Model.getCartQty = function (uid) {
@@ -151,7 +154,7 @@ Model.purchase = function (uid, address, card_number, card_holder) {
         }
         return Promise.all([OrderItem.insertMany(orderItems)]).then(function () {
             return order.save().then(function () {
-                return user.save().then(function (){
+                return user.save().then(function () {
                     return order;
                 })
             })
@@ -174,7 +177,7 @@ Model.getCartByUserId = function (uid) {
 Model.getOrdersByUserId = function (uid) {
     return User.findById(uid).populate({
         path: 'orders',
-        populate: {path : 'orderItems', populate : 'product'}
+        populate: { path: 'orderItems', populate: 'product' }
     }).then(function (user) {
         if (user) {
             return user.orders;

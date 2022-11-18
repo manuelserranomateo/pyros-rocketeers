@@ -145,7 +145,7 @@ app.get('/api/users/profile', function (req, res, next) {
         return res.status(401).send({ message: 'User has not signed in' });
     }
     return Model.getUserById(uid).then(function (profile){
-        return res.json(profile);s
+        return res.json(profile);
     });
 
 });
