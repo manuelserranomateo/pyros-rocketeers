@@ -80,22 +80,19 @@ Model.removeItem = function (uid, pid, all = false) {
     }).catch(function (err) { console.error(err); return null; });
 };
 
-// to do
 Model.getOrder = function (number, uid) {
-    return User.findById(uid).then(function (user) {
-        if (user) {
-            return Order.find({ number }).then(function (orders) {
-                if ((orders.length > 0) && user.orders.includes(orders[0]._id)) {
-                    return orders[0].populate({
-                        path: 'orderItems',
-                        populate: { path: 'product' }
-                    });
+    return User.findById(uid).populate({
+        path: 'orders',
+        populate: { path: 'orderItems', populate: 'product' }
+    }).then(function (user){
+        if (user){
+            for (var i = 0; i < user.orders.length; i++){
+                if (user.orders[i].number == number){
+                    return user.orders[i];
                 }
-                return null;
-            });
+            }
         }
-        return null
-    });
+    })
 }
 
 Model.getUserById = function (userid) {
