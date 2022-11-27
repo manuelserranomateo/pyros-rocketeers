@@ -12,10 +12,6 @@ Model.signin = function (email, password) {
     return User.findOne({ email, password });
 };
 
-Model.signout = function () {
-    Model.user = null;
-}
-
 Model.signup = function (name, surname, address, birth, email, password) {
     return User.findOne({ email }).then(function (user) {
         if (!user) {
