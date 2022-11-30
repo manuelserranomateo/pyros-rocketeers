@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var bcryptjs = require('bcryptjs');
 
 var User = require('./user');
 var Product = require('./product');
@@ -17,7 +18,7 @@ Model.signup = function (name, surname, address, birth, email, password) {
         if (!user) {
             var user = new User({
                 email: email,
-                password: password,
+                password: bcryptjs.hashSync(password, bcryptjs.genSaltSync()),
                 name: name,
                 surname: surname,
                 birth: (new Date(birth)).getTime(),
