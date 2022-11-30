@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
+// Used to calculate the hash
+var bcryptjs = require('bcryptjs');
 
 //Schemas
 var User = require('./user');
@@ -9,7 +11,7 @@ var Order = require('./order');
 var OrderItem = require('./orderItem')
 
 
-var uri = 'mongodb://127.0.0.1/pyros-rocketeers'; //hasta game-shop es el server, lo de despues es el nombre de la bbdd
+var uri = 'mongodb://127.0.0.1/pyros-rocketeers';
 var db = mongoose.connection;
 
 db.on('connecting', function () {
@@ -31,7 +33,7 @@ db.on('error', function (err) {
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(function () {
     var user = new User({
         email: 'gabricp@gmail.com',
-        password: 'lamparita22',
+        password: bcryptjs.hashSync('lamparita22', bcryptjs.genSaltSync()),
         name: 'Gabriel',
         surname: 'Chilleron',
         birth: new Date("1977-12-30"),
@@ -143,43 +145,6 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(
             ])
         })
         .then(function () { return mongoose.disconnect(); });
-
-    // return CartItem.deleteMany()
-    //     .then(function () { return User.deleteMany(); })
-    //     .then(function () { return cartItems[0].save(); })
-    //     .then(function () { return cartItems[1].save(); })
-    //     .then(function () { return user.save(); })
-    //     .then(function () {
-    //         console.log('user', user);
-    //         return User.find({ email: 'johndoe@example.com' });
-    //     }).then(function (result) {
-    //         console.log('Non-populated user', result[0]);
-    //         return User.find({ email: 'johndoe@example.com' }).populate('cartItems');
-    //     }).then(function (result) {
-    //         console.log('Populated user', result[0]);
-    //         return mongoose.disconnect();
-    //     });
-    //return user.save().then(function (result) {  //Lo introduce en la base de datos  
-    //return User.find().then(function (result) {   //Así busca todos
-    //return User.findById(mongoose.Types.ObjectId("636bd0acca52534d4536cb9b")).then(function (result) { //Asi por id
-    //return User.find({ email: 'johndoe@example.com'}).then(function (result) { //Así por el resto de att, pueden ser varios
-    //return User.deleteOne({email:'johndoe@example.com'}).then(function (result) { //Así para borrar
-    //return User.findOne({email:'johndoe@example.com'}).then(function (user) { //Ejemplo para encadenar operaciones(otra forma de borrar)
-    //     return user.remove();
-    //   }).then(function () {
-    //     return User.find();
-    //   }).then(function (result) { //hasta aqui esta parte de codigo de encadenar
-
-    //     return User.findOne({ email: 'johndoe@example.com' }) //así para modificar atributos
-    // }).then(function (user) {
-    //     console.log('Pre:', user);
-    //     user.password = 'admin2';
-    //     return user.save();
-    // }).then(function (result) {
-
-    //     console.log(result);
-    //     return mongoose.disconnect();
-    // });
 }).catch(function (err) {
     console.error('Error:', err.message);
 });

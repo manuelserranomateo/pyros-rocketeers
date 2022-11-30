@@ -12,48 +12,75 @@ Model.signin = function (email, password) {
     });
 };
 
-Model.getUserId = function () {
-    var uid = RegExp('uid=[^;]+').exec(document.cookie);
-    if (uid) {
-        uid = decodeURIComponent(uid[0].replace(/^[^=]+./, ""));
-        return uid;
+Model.getToken = function () {
+    if (document.cookie) {
+        var token = RegExp('token=[^;]+').exec(document.cookie);
+        if (token) {
+            token = decodeURIComponent(token[0].replace(/^[^=]+./, ""));
+            return token;
+        }
     }
     return null;
 };
 
 Model.signout = function () {
-    document.cookie = 'uid=;expires=0;path=/;'
+    document.cookie = 'token=;expires=0;path=/;'
 };
 
 Model.getCartQty = function () {
     return $.ajax({
         url: '/api/cart/qty',
-        method: 'GET'
+        method: 'GET',
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        }
     });
 };
 
 Model.addItem = function (pid) {
     return $.ajax({
         url: '/api/cart/items/product/' + pid,
-        method: 'POST'
+        method: 'POST',
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        }
     });
+    
 };
 
 Model.getCart = function () {
     return $.ajax({
         url: '/api/cart',
-        method: 'GET'
+        method: 'GET',
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        } 
     });
 };
 
 Model.removeItem = function (pid, all = false) {
     return $.ajax({
         url: '/api/cart/items/product/' + pid + (all ? '/all' : ''),
-        method: 'DELETE'
+        method: 'DELETE',
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        } 
     });
 };
 
-Model.signup = function (name, surname, address, birth, email, password){
+Model.signup = function (name, surname, address, birth, email, password) {
     return $.ajax({
         url: '/api/users/signup',
         method: 'POST',
@@ -61,29 +88,47 @@ Model.signup = function (name, surname, address, birth, email, password){
     })
 }
 
-Model.getProfile = function (){
+Model.getProfile = function () {
     return $.ajax({
         url: '/api/users/profile',
-        method: 'GET'
+        method: 'GET',
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        } 
     })
 }
 
-Model.getOrder = function (oid){
+Model.getOrder = function (oid) {
     return $.ajax({
-        url: '/api/orders/id/'+oid,
-        method: 'GET'
+        url: '/api/orders/id/' + oid,
+        method: 'GET',
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        } 
     })
 }
 
-Model.purchase = function (card_number,card_owner,address){
+Model.purchase = function (card_number, card_owner, address) {
     return $.ajax({
         url: '/api/orders',
         method: 'POST',
-        data: { card_number, card_owner, address }
+        data: { card_number, card_owner, address },
+        beforeSend: function (xhr) {
+            var token = Model.getToken();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + Model.getToken());
+            }
+        } 
     })
 }
 
-Model.getOrdersByUserId = function(){
+Model.getOrdersByUserId = function () {
     return $.ajax({
         url: '/api/orders',
         method: 'GET'

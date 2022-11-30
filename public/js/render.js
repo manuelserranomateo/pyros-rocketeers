@@ -21,7 +21,7 @@ function route() {
     var matches = null;
     var templates = ['signin', 'cart', 'order', 'profile', 'signup', 'index', 'purchase'];
     console.log('ROUTING ', path);
-    var context = { user: Model.getUserId(), messages: { success: Messages.success, danger: Messages.danger } };
+    var context = { user: Model.getToken(), messages: { success: Messages.success, danger: Messages.danger } };
     Messages.clear();
     var cartQtyP = Model.getCartQty().done(function (cartQty) {
         context.cartQty = cartQty;
