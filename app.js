@@ -45,7 +45,7 @@ passport.use(new JwtStrategy({ jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearer
 
 function uidFromToken(req, res) {
     if (req.user) {
-        res.cookie('token', jwt.sign({ id: req.user._id }, secretKey, { expiresIn: 20 }), { expires: new Date(Date.now() + 20000) });
+        res.cookie('token', jwt.sign({ id: req.user._id }, secretKey, { expiresIn: 60 }), { expires: new Date(Date.now() + 60000) });
         return req.user._id;
     } else {
         res.clearCookie('token');
