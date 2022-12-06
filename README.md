@@ -1,9 +1,9 @@
 # Pyros Rocketeers 🚀 💵
 Web Engineering and Services e-Commerce project Course 22-23
 
-## Descripción
+## Description
 In this repository you can find the source code of a fictional e-Commerce Rocket League cars web application
-## Comenzando 
+## Starting 
 
 ### Before executing 📋
 Install node from the following link
